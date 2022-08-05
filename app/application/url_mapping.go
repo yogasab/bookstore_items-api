@@ -7,5 +7,8 @@ import (
 )
 
 func mapURLS() {
+	itemsHandler := handlers.NewItemsHandler()
 	router.HandleFunc("/ping", handlers.NewPingHandler().Ping).Methods(http.MethodGet)
+	router.HandleFunc("/get", itemsHandler.Get).Methods(http.MethodGet)
+	router.HandleFunc("/create", itemsHandler.Create).Methods(http.MethodPost)
 }
