@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/yogasab/bookstore_items-api/app/domain/items"
-	"github.com/yogasab/bookstore_items-api/app/utils/rest_errors"
+	rest_errors "github.com/yogasab/bookstore_items-api/app/utils/rest_errors_utils"
 )
 
 type ItemsService interface {
