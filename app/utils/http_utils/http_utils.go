@@ -14,5 +14,5 @@ func ResponseJSON(w http.ResponseWriter, code int, data interface{}) {
 }
 
 func ResponseJSONError(w http.ResponseWriter, err rest_errors_utils.RestErrors) {
-	ResponseJSON(w, err.Code, err)
+	ResponseJSON(w, err.Code(), err)
 }

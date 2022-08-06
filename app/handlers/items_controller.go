@@ -40,7 +40,7 @@ func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
 	bytesResult, err := ioutil.ReadAll(r.Body)
 	if err != nil {
 		restError := rest_errors_utils.NewBadRequestError("invalid request body")
-		http_utils.ResponseJSONError(w, *restError)
+		http_utils.ResponseJSONError(w, restError)
 		return
 	}
 	defer r.Body.Close()
@@ -48,7 +48,7 @@ func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
 	var item items.Item
 	if err = json.Unmarshal(bytesResult, &item); err != nil {
 		restError := rest_errors_utils.NewBadRequestError("invalid request item struct body")
-		http_utils.ResponseJSONError(w, *restError)
+		http_utils.ResponseJSONError(w, restError)
 		return
 	}
 
@@ -56,7 +56,7 @@ func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	result, errCreate := h.itemService.Create(item)
 	if err != nil {
-		http_utils.ResponseJSONError(w, *errCreate)
+		http_utils.ResponseJSONError(w, errCreate)
 		return
 	}
 	http_utils.ResponseJSON(w, http.StatusCreated, result)

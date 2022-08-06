@@ -3,14 +3,47 @@ package rest_errors_utils
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 )
 
-type RestErrors struct {
-	Code    int         `json:"code"`
-	Status  string      `json:"status"`
-	Message string      `json:"message"`
-	Data    interface{} `json:"data"`
+type RestErrors interface {
+	Code() int
+	Status() string
+	Message() string
+	Data() []interface{}
+}
+
+type restErrors struct {
+	code    int           `json:"code"`
+	status  string        `json:"status"`
+	message string        `json:"message"`
+	data    []interface{} `json:"data"`
+}
+
+func NewRestErrors(code int, status string, message string, data []interface{}) RestErrors {
+	return restErrors{
+		code:    code,
+		status:  status,
+		message: message,
+		data:    data,
+	}
+}
+
+func (re restErrors) Code() int {
+	return re.code
+}
+
+func (re restErrors) Status() string {
+	return re.status
+}
+
+func (re restErrors) Message() string {
+	return fmt.Sprintf("message: %s - code: %d - status: %s - data: %v", re.message, re.code, re.status, re.data)
+}
+
+func (re restErrors) Data() []interface{} {
+	return re.data
 }
 
 func NewErrFromBytes(bytes []byte) (*RestErrors, error) {
@@ -22,51 +55,54 @@ func NewErrFromBytes(bytes []byte) (*RestErrors, error) {
 	return &restErrors, nil
 }
 
-func NewGeneralError(code int, message string, status string, data interface{}) *RestErrors {
-	generalError := RestErrors{
-		Code:    code,
-		Status:  status,
-		Message: message,
-		Data:    data,
+func NewGeneralError(code int, message string, status string, data []interface{}) RestErrors {
+	generalError := restErrors{
+		code:    code,
+		status:  status,
+		message: message,
+		data:    data,
 	}
-	return &generalError
+	return generalError
 }
-func NewBadRequestError(message string) *RestErrors {
-	badRequestError := RestErrors{
-		Code:    http.StatusBadRequest,
-		Status:  "failed",
-		Message: message,
-		Data:    nil,
+func NewBadRequestError(message string) RestErrors {
+	badRequestError := restErrors{
+		code:    http.StatusBadRequest,
+		status:  "failed",
+		message: message,
+		data:    nil,
 	}
-	return &badRequestError
-}
-
-func NewNotFoundError(message string) *RestErrors {
-	notFoundError := RestErrors{
-		Code:    http.StatusNotFound,
-		Status:  "failed",
-		Message: message,
-		Data:    nil,
-	}
-	return &notFoundError
+	return badRequestError
 }
 
-func NewUnauthorizedError(message string) *RestErrors {
-	unauthorizedError := RestErrors{
-		Code:    http.StatusUnauthorized,
-		Status:  "failed",
-		Message: message,
-		Data:    nil,
+func NewNotFoundError(message string) RestErrors {
+	notFoundError := restErrors{
+		code:    http.StatusNotFound,
+		status:  "failed",
+		message: message,
+		data:    nil,
 	}
-	return &unauthorizedError
+	return notFoundError
 }
 
-func NewInternalServerError(message string) *RestErrors {
-	internalServerError := RestErrors{
-		Code:    http.StatusInternalServerError,
-		Status:  "error",
-		Message: message,
-		Data:    nil,
+func NewUnauthorizedError(message string) RestErrors {
+	unauthorizedError := restErrors{
+		code:    http.StatusUnauthorized,
+		status:  "failed",
+		message: message,
+		data:    nil,
 	}
-	return &internalServerError
+	return unauthorizedError
+}
+
+func NewInternalServerError(message string, err error) RestErrors {
+	internalServerError := restErrors{
+		code:    http.StatusInternalServerError,
+		status:  "failed",
+		message: message,
+		data:    nil,
+	}
+	if err != nil {
+		internalServerError.data = append(internalServerError.data, err.Error())
+	}
+	return internalServerError
 }
