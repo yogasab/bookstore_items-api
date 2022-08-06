@@ -48,9 +48,12 @@ type esClient struct {
 // }
 
 func Init() {
+	logger := logger.NewLogger()
 	es, err := elastic.NewClient(
 		elastic.SetURL("http://127.0.0.1:9206"),
 		elastic.SetHealthcheckInterval(10*time.Second),
+		elastic.SetErrorLog(logger),
+		elastic.SetInfoLog(logger),
 	)
 	if err != nil {
 		log.Println(err.Error())
