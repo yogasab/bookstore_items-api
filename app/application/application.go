@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/yogasab/bookstore_items-api/app/client/elasticsearch"
 )
 
 var (
@@ -12,6 +13,7 @@ var (
 )
 
 func StartApplication() {
+	elasticsearch.Init()
 	mapURLS()
 	server := &http.Server{
 		Handler: router,
