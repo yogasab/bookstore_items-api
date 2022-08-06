@@ -20,12 +20,10 @@ func NewItemsService() ItemsService {
 }
 
 func (s *itemService) Create(item items.Item) (*items.Item, *rest_errors.RestErrors) {
-	return nil, &rest_errors.RestErrors{
-		Code:    http.StatusNotImplemented,
-		Status:  "failed",
-		Message: "not implemented",
-		Data:    nil,
+	if err := item.Save(); err != nil {
+		return nil, err
 	}
+	return &item, nil
 }
 func (s *itemService) Get(string) (*items.Item, *rest_errors.RestErrors) {
 	return nil, &rest_errors.RestErrors{

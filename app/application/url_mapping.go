@@ -12,6 +12,6 @@ func mapURLS() {
 
 	router.HandleFunc("/ping", handlers.NewPingHandler().Ping).Methods(http.MethodGet)
 
-	router.HandleFunc("/get", itemsHandler.Get).Methods(http.MethodGet)
-	router.HandleFunc("/create", itemsHandler.Create).Methods(http.MethodPost)
+	router.HandleFunc("/items/get", itemsHandler.Get).Methods(http.MethodGet)
+	router.HandleFunc("/items/create", itemsHandler.Create).Methods(http.MethodPost)
 }

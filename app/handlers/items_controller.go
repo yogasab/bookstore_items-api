@@ -30,6 +30,12 @@ func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		http_utils.ResponseJSON(w, err.Code, err)
 		return
 	}
+	sellerID := oauth.GetCallerID(r)
+	if sellerID == 0 {
+		restError := rest_errors_utils.NewUnauthorizedError("invalid access token")
+		http_utils.ResponseJSON(w, http.StatusUnauthorized, restError)
+		return
+	}
 
 	bytesResult, err := ioutil.ReadAll(r.Body)
 	if err != nil {
@@ -46,7 +52,7 @@ func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	item.Seller = oauth.GetCallerID(r)
+	item.Seller = sellerID
 
 	result, errCreate := h.itemService.Create(item)
 	if err != nil {
