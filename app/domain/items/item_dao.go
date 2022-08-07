@@ -9,10 +9,11 @@ import (
 
 var (
 	indexItems = "items"
+	indexType  = "_doc"
 )
 
 func (i *Item) Save() rest_errors_utils.RestErrors {
-	response, err := elasticsearch.ESClient.Index(indexItems, i)
+	response, err := elasticsearch.ESClient.Index(indexItems, indexType, i)
 	if err != nil {
 		rest_errors_utils.NewInternalServerError(err.Error(), errors.New("database error"))
 	}

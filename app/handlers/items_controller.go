@@ -8,8 +8,8 @@ import (
 	"github.com/yogasab/bookstore_items-api/app/domain/items"
 	"github.com/yogasab/bookstore_items-api/app/services"
 	"github.com/yogasab/bookstore_items-api/app/utils/http_utils"
+	"github.com/yogasab/bookstore_items-api/app/utils/oauth"
 	"github.com/yogasab/bookstore_items-api/app/utils/rest_errors_utils"
-	"github.com/yogasab/bookstore_oauth-go/oauth"
 )
 
 type ItemsHandler interface {
@@ -26,8 +26,9 @@ func NewItemsHandler(itemService services.ItemsService) ItemsHandler {
 }
 
 func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
-	if err := oauth.AuthenticateRequest(r); err != nil {
-		http_utils.ResponseJSON(w, err.Code, err)
+	errRest := oauth.AuthenticateRequest(r)
+	if errRest != nil {
+		http_utils.ResponseJSON(w, errRest.Code, errRest)
 		return
 	}
 	sellerID := oauth.GetCallerID(r)

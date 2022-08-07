@@ -16,7 +16,7 @@ var (
 
 type esClientInterface interface {
 	setClient(*elastic.Client)
-	Index(index string, body interface{}) (*elastic.IndexResponse, error)
+	Index(index string, docType string, body interface{}) (*elastic.IndexResponse, error)
 }
 
 type esClient struct {
@@ -66,11 +66,12 @@ func (es *esClient) setClient(client *elastic.Client) {
 	es.client = client
 }
 
-func (ec *esClient) Index(index string, body interface{}) (*elastic.IndexResponse, error) {
+func (ec *esClient) Index(index string, docType string, body interface{}) (*elastic.IndexResponse, error) {
 	ctx := context.Background()
 	response, err := ec.client.
 		Index().
 		Index(index).
+		Type(docType).
 		BodyJson(body).
 		Do(ctx)
 	if err != nil {
