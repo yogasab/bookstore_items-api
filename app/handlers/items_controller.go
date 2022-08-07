@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"strings"
 
+	"github.com/gorilla/mux"
 	"github.com/yogasab/bookstore_items-api/app/domain/items"
 	"github.com/yogasab/bookstore_items-api/app/services"
 	"github.com/yogasab/bookstore_items-api/app/utils/http_utils"
@@ -64,4 +66,12 @@ func (h *itemsHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *itemsHandler) Get(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	itemID := strings.TrimSpace(vars["id"])
+	result, err := h.itemService.Get(itemID)
+	if err != nil {
+		http_utils.ResponseJSON(w, err.Code(), err)
+		return
+	}
+	http_utils.ResponseJSON(w, http.StatusOK, result)
 }

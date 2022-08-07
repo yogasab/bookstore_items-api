@@ -17,6 +17,7 @@ var (
 type esClientInterface interface {
 	setClient(*elastic.Client)
 	Index(index string, docType string, body interface{}) (*elastic.IndexResponse, error)
+	GetByID(index string, docType string, ID string) (*elastic.GetResult, error)
 }
 
 type esClient struct {
@@ -79,4 +80,14 @@ func (ec *esClient) Index(index string, docType string, body interface{}) (*elas
 		return nil, err
 	}
 	return response, nil
+}
+
+func (ec *esClient) GetByID(index string, docType string, ID string) (*elastic.GetResult, error) {
+	ctx := context.Background()
+	result, err := ec.client.Get().Index(index).Type(docType).Id(ID).Do(ctx)
+	if err != nil {
+		logger.Error(fmt.Sprintf("error while trying to get document by id %s", ID), err)
+		return nil, err
+	}
+	return result, nil
 }
