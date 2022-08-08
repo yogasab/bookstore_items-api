@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
+	"github.com/yogasab/bookstore_items-api/app/domain/es_queries"
 	"github.com/yogasab/bookstore_items-api/app/domain/items"
 	"github.com/yogasab/bookstore_items-api/app/services"
 	"github.com/yogasab/bookstore_items-api/app/utils/http_utils"
@@ -17,6 +18,7 @@ import (
 type ItemsHandler interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Get(w http.ResponseWriter, r *http.Request)
+	Search(w http.ResponseWriter, r *http.Request)
 }
 
 type itemsHandler struct {
@@ -74,4 +76,30 @@ func (h *itemsHandler) Get(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	http_utils.ResponseJSON(w, http.StatusOK, result)
+}
+
+func (h *itemsHandler) Search(w http.ResponseWriter, r *http.Request) {
+	bytes, err := ioutil.ReadAll(r.Body)
+	if err != nil {
+		errRest := rest_errors_utils.NewBadRequestError("invalid json body")
+		http_utils.ResponseJSONError(w, errRest)
+		return
+	}
+	defer r.Body.Close()
+
+	var query es_queries.ESQueries
+	if err = json.Unmarshal(bytes, &query); err != nil {
+		errRest := rest_errors_utils.NewBadRequestError("invalid json body")
+		http_utils.ResponseJSONError(w, errRest)
+		return
+	}
+
+	items, errRest := h.itemService.Search(query)
+	if errRest != nil {
+		errRest := rest_errors_utils.NewBadRequestError("invalid json body")
+		http_utils.ResponseJSONError(w, errRest)
+		return
+	}
+
+	http_utils.ResponseJSON(w, http.StatusOK, items)
 }

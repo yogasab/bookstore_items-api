@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/yogasab/bookstore_items-api/app/client/elasticsearch"
+	"github.com/yogasab/bookstore_items-api/app/domain/es_queries"
 	"github.com/yogasab/bookstore_items-api/app/utils/rest_errors_utils"
 )
 
@@ -40,4 +41,26 @@ func (i *Item) GetByID(ID string) rest_errors_utils.RestErrors {
 	}
 	i.ID = ID
 	return nil
+}
+
+func (i *Item) Search(query es_queries.ESQueries) (*[]Item, rest_errors_utils.RestErrors) {
+	// Search by search query from es client
+	result, err := elasticsearch.ESClient.Search(indexItems, query.Build())
+	if err != nil {
+		return nil, rest_errors_utils.NewInternalServerError("error when trying to search documents", errors.New("database error"))
+	}
+	items := make([]Item, result.TotalHits())
+	for index, hit := range result.Hits.Hits {
+		bytes, _ := hit.Source.MarshalJSON()
+		var item Item
+		if err = json.Unmarshal(bytes, &item); err != nil {
+			return nil, rest_errors_utils.NewInternalServerError("error when trying to parse response", errors.New("database error"))
+		}
+		item.ID = hit.Id
+		items[index] = item
+	}
+	if len(items) == 0 {
+		return nil, rest_errors_utils.NewNotFoundError("no items found matching given criteria")
+	}
+	return &items, nil
 }
